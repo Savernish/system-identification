@@ -64,6 +64,8 @@ def run_multiclass_cam():
             conf_val = conf.item() * 100
             pred_class = class_names[pred.item()]
 
+            
+
         img_np = img_tensor.squeeze().cpu().numpy()
         img_np = (img_np - img_np.min()) / (img_np.max() - img_np.min() + 1e-8)
         img_rgb = np.repeat(img_np[:, :, np.newaxis], 3, axis=2)

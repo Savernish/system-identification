@@ -6,9 +6,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from src.training.dataset import SystemIDDataset
-from src.models.build_fusion_net import MultimodalFusionNet
+from src.models.build_fusion_net_lstm import MultimodalFusionNetLSTM
 
-def train_fusion_model():
+def train_fusion_model_lstm():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Cihaz: {device}")
 
@@ -19,7 +19,7 @@ def train_fusion_model():
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=0, pin_memory=True)
     val_loader   = DataLoader(val_dataset,   batch_size=64, shuffle=False, num_workers=0, pin_memory=True)
 
-    model = MultimodalFusionNet(num_classes=6).to(device)
+    model = MultimodalFusionNetLSTM(num_classes=6).to(device)
     
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(model.parameters(), lr=3e-4, weight_decay=1e-4)
@@ -52,7 +52,7 @@ def train_fusion_model():
             loss.backward()
             
             # Gradient Clipping
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
             
             optimizer.step()
             
@@ -96,6 +96,6 @@ def train_fusion_model():
                 break
 
     if best_model_weights:
-        save_path = os.path.join(root_dir, '..', 'results', 'trained_nets', 'grand_fusion_model_best.pth')
+        save_path = os.path.join(root_dir, '..', 'results', 'trained_nets', 'grand_fusion_model_lstm_best.pth')
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         torch.save(best_model_weights, save_path)

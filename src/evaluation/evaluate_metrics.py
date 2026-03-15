@@ -1,4 +1,3 @@
-# src/evaluation/evaluate_metrics.py
 import os
 import sys
 import argparse
@@ -55,12 +54,10 @@ def evaluate_model(model_type="fusion"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Değerlendirme başlatılıyor... Model: {cfg['label']} | Cihaz: {device}")
 
-    # Test verisini yükle
     data_dir = os.path.join(project_root, 'data')
     test_dataset = SystemIDDataset(root_dir=data_dir, split='test')
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=0)
 
-    # Modeli yükle
     model = cfg["class"](num_classes=6).to(device)
     model_path = os.path.join(project_root, 'results', 'trained_nets', cfg["weights"])
 
@@ -97,15 +94,12 @@ def evaluate_model(model_type="fusion"):
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.numpy())
 
-    # Sınıflandırma Raporu
     class_names = test_dataset.classes
     print(f"\n--- Sınıflandırma Raporu: {cfg['label']} ---")
     print(classification_report(all_labels, all_preds, target_names=class_names))
 
-    # Karmaşıklık Matrisi (Confusion Matrix)
     cm = confusion_matrix(all_labels, all_preds)
 
-    # Görselleştirme ve Kaydetme
     plt.figure(figsize=(10, 8))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
     plt.title(f'Karmaşıklık Matrisi - {cfg["label"]} (Test Seti)')

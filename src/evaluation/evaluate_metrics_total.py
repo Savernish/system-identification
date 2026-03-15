@@ -1,5 +1,3 @@
-# src/evaluation/evaluate_metrics_total.py
-# Comprehensive evaluation of ALL models — confusion matrices, per-class metrics, comparison table
 import os
 import sys
 import torch
@@ -125,7 +123,6 @@ def plot_confusion_matrices(all_results, class_names, save_dir):
         ax.set_xlabel('Tahmin Edilen Sınıf')
         ax.tick_params(axis='x', rotation=45)
 
-    # Hide unused axes
     for idx in range(n, len(axes)):
         axes[idx].set_visible(False)
 
@@ -195,7 +192,6 @@ def plot_per_class_comparison(all_results, class_names, save_dir):
             values = all_results[mk][metric_key]
             color = cmap((i + 2) / (n_models + 3))
             bars = ax.bar(x + i * width, values * 100, width, label=ml, color=color, edgecolor='white')
-            # Add value labels on bars
             for bar, val in zip(bars, values):
                 if bar.get_height() > 5:
                     ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() - 3,
@@ -293,7 +289,6 @@ def evaluate_all():
     print(f"  Cihaz: {device}")
     print(f"{'='*70}\n")
 
-    # Load dataset once
     data_dir = os.path.join(project_root, 'data')
     test_dataset = SystemIDDataset(root_dir=data_dir, split='test')
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=0)
@@ -303,7 +298,6 @@ def evaluate_all():
     print(f"Test seti: {len(test_dataset)} örnek, {n_classes} sınıf")
     print(f"Sınıflar: {class_names}\n")
 
-    # ── Evaluate each model ──
     all_results = {}
     available_models = []
 
@@ -321,7 +315,6 @@ def evaluate_all():
 
         preds, labels, confs = run_inference(model, model_key, test_loader, device)
 
-        # Compute metrics
         acc = accuracy_score(labels, preds) * 100
         p_per_class, r_per_class, f1_per_class, support = precision_recall_fscore_support(
             labels, preds, average=None, zero_division=0
@@ -353,7 +346,6 @@ def evaluate_all():
         available_models.append(model_key)
         print(f"Acc: {acc:.2f}%  |  F1: {macro_f1:.2f}%")
 
-        # Also free GPU memory
         del model
         torch.cuda.empty_cache()
 
@@ -361,12 +353,10 @@ def evaluate_all():
         print("\n⛔ Hiçbir eğitilmiş model bulunamadı!")
         return
 
-    # ── Print detailed results ──
     print(f"\n{'='*70}")
     print(f"  DETAYLI SONUÇLAR")
     print(f"{'='*70}")
 
-    # 1. Overall comparison table
     print(f"\n{'─'*70}")
     print("  1) GENEL KARŞILAŞTIRMA TABLOSU")
     print(f"{'─'*70}")
@@ -386,7 +376,6 @@ def evaluate_all():
         ])
     print(tabulate(overview_rows, headers=overview_headers, tablefmt="fancy_grid", stralign="center"))
 
-    # 2. Per-class breakdown for each model
     for mk in available_models:
         d = all_results[mk]
         label = MODEL_CONFIG[mk]["label"]
@@ -410,7 +399,6 @@ def evaluate_all():
             ])
         print(tabulate(class_rows, headers=class_headers, tablefmt="fancy_grid", stralign="center"))
 
-    # 3. Side-by-side F1 per class across models
     print(f"\n{'─'*70}")
     print("  3) SINIF BAZLI F1-SCORE KARŞILAŞTIRMASI (Tüm Modeller)")
     print(f"{'─'*70}")
@@ -432,7 +420,6 @@ def evaluate_all():
         f1_rows.append(row)
     print(tabulate(f1_rows, headers=f1_headers, tablefmt="fancy_grid", stralign="center"))
 
-    # 4. Confidence analysis
     print(f"\n{'─'*70}")
     print("  4) GÜVEN ANALİZİ")
     print(f"{'─'*70}")
@@ -449,7 +436,6 @@ def evaluate_all():
         ])
     print(tabulate(conf_rows, headers=conf_headers, tablefmt="fancy_grid", stralign="center"))
 
-    # 5. sklearn classification_report for each model
     for mk in available_models:
         d = all_results[mk]
         label = MODEL_CONFIG[mk]["label"]
@@ -458,7 +444,6 @@ def evaluate_all():
         print(f"{'─'*70}")
         print(classification_report(d["labels"], d["preds"], target_names=class_names, digits=4))
 
-    # ── Generate plots ──
     report_dir = os.path.join(project_root, 'results', 'reports', 'total_evaluation')
     os.makedirs(report_dir, exist_ok=True)
 
@@ -472,7 +457,6 @@ def evaluate_all():
     plot_overall_comparison(all_results, report_dir)
     plot_confidence_distribution(all_results, report_dir)
 
-    # ── Save text report ──
     report_path = os.path.join(report_dir, 'evaluation_report.txt')
     with open(report_path, 'w', encoding='utf-8') as f:
         f.write("KAPSAMLI MODEL DEĞERLENDİRME RAPORU\n")

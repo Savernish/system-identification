@@ -82,13 +82,11 @@ class MultimodalFusionNetLSTM(nn.Module):
         )
 
     def forward(self, img, sig):
-        # 1D branch with LSTM
         x1d = self.branch_1d(sig)
         x1d = x1d.permute(0, 2, 1)       # (B, Channels, SeqLen) -> (B, SeqLen, Channels)
         lstm_out, _ = self.lstm(x1d)
         f1d = self.fc_1d(lstm_out[:, -1, :])  # last timestep
 
-        # 2D branch
         f2d = self.fc_2d(self.branch_2d(img))
 
         # Normalize to prevent modality dominance

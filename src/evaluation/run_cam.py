@@ -1,4 +1,3 @@
-# src/evaluation/run_cam.py
 import os
 import sys
 import torch
@@ -43,7 +42,6 @@ def run_multiclass_cam():
             found_classes.add(label.item())
         if len(selected_indices) == num_classes: break
 
-    # Grafik Ayarları (Beyaz Arka Plan)
     plt.rcParams.update({'figure.facecolor': 'white', 'axes.facecolor': 'white'})
     fig, axes = plt.subplots(num_classes, 2, figsize=(14, 3 * num_classes))
     target_layers = [model.branch_2d[8]]
@@ -73,12 +71,10 @@ def run_multiclass_cam():
 
         true_class = class_names[label.item()]
         
-        # Orijinal Görüntü
         axes[idx, 0].imshow(img_np, cmap='gray')
         axes[idx, 0].set_title(f"Target: {true_class}", fontsize=14, color='black', fontweight='bold')
         axes[idx, 0].axis('off')
 
-        # CAM Görüntüsü
         axes[idx, 1].imshow(visualization)
         color = 'green' if true_class == pred_class else 'red'
         axes[idx, 1].set_title(f"Pred: {pred_class} ({conf_val:.1f}%)", fontsize=14, color=color, fontweight='bold')

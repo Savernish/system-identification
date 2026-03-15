@@ -149,7 +149,6 @@ def signal_to_binary_image(y):
     y_margin = (y_max - y_min) * 0.05 if y_max > y_min else 0.5
     ax.set_ylim(y_min - y_margin, y_max + y_margin)
 
-    # Render to array
     fig.canvas.draw()
     buf = fig.canvas.buffer_rgba()
     img_array = np.asarray(buf)
@@ -212,15 +211,11 @@ def generate_dataset(
                 sample_name = f"sample_{i:04d}"
 
                 try:
-                    # 1. Generate random transfer function
                     tf_sys = gen_func(rng)
-
-                    # 2. Simulate step response
                     t, u, y = simulate_step_response(tf_sys)
 
-                    # 3. Check for unstable/diverging systems and retry
+                    # skip unstable/diverging systems, retry up to 10 times
                     if not np.all(np.isfinite(y)) or np.max(np.abs(y)) > 1e6:
-                        # Retry with new parameters
                         for _ in range(10):
                             tf_sys = gen_func(rng)
                             t, u, y = simulate_step_response(tf_sys)
@@ -230,14 +225,11 @@ def generate_dataset(
                             failed += 1
                             continue
 
-                    # 4. Add noise
                     y_noisy = add_noise(y, rng)
 
-                    # 5. Save signal as .npy [2, 2000]
-                    sig_array = np.vstack((u, y_noisy)).astype(np.float32)
+                    sig_array = np.vstack((u, y_noisy)).astype(np.float32)  # shape [2, N_POINTS]
                     np.save(os.path.join(sig_dir, f"{sample_name}.npy"), sig_array)
 
-                    # 6. Generate and save binary image
                     img = signal_to_binary_image(y_noisy)
                     img.save(os.path.join(img_dir, f"{sample_name}.png"))
 

@@ -42,11 +42,9 @@ class SystemIDDataset(Dataset):
                 if not os.path.exists(sig_path):
                     continue
 
-                # Load image once
                 with Image.open(img_path) as im:
                     img_tensor = self.transform(im)
 
-                # Load signal once
                 sig_array = np.load(sig_path)
                 sig_tensor = torch.from_numpy(sig_array).float()
 

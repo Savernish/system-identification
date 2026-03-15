@@ -61,11 +61,8 @@ class SignalOnlyNetLSTM(nn.Module):
         # Permute from (Batch, Channels, SeqLen) to (Batch, SeqLen, Channels)
         x = x.permute(0, 2, 1)
         
-        # LSTM output extraction
         lstm_out, _ = self.lstm(x)
-        
-        # Isolate final timestep hidden state
-        x = lstm_out[:, -1, :]
+        x = lstm_out[:, -1, :]  # final timestep hidden state
         
         x = self.fc_1d(x)
         return self.classifier(x)

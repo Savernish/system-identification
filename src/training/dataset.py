@@ -6,6 +6,7 @@ from torch.utils.data import Dataset
 import numpy as np
 from PIL import Image
 import torchvision.transforms as transforms
+from tqdm import tqdm
 
 # Normalisation constants — bring all regression targets into roughly [0, 1]
 REG_SCALES = {
@@ -43,31 +44,33 @@ class SystemIDDataset(Dataset):
         images, signals, labels = [], [], []
         has_dt_list, dt_val_list, reg_list = [], [], []
 
+        all_img_paths = []
         for cls in self.classes:
-            img_paths = sorted(glob.glob(os.path.join(self.img_dir, cls, '*.png')))
-            for img_path in img_paths:
-                fname    = os.path.splitext(os.path.basename(img_path))[0]
-                sig_path = os.path.join(self.sig_dir, cls, fname + '.npy')
-                if not os.path.exists(sig_path):
-                    continue
+            all_img_paths += [(cls, p) for p in sorted(glob.glob(os.path.join(self.img_dir, cls, '*.png')))]
 
-                with Image.open(img_path) as im:
-                    images.append(self.transform(im))
-                signals.append(torch.from_numpy(np.load(sig_path)).float())
-                labels.append(self.class_to_idx[cls])
+        for cls, img_path in tqdm(all_img_paths, desc=f'Loading {split}', unit='sample'):
+            fname    = os.path.splitext(os.path.basename(img_path))[0]
+            sig_path = os.path.join(self.sig_dir, cls, fname + '.npy')
+            if not os.path.exists(sig_path):
+                continue
 
-                row    = metadata.get((cls, fname), {})
-                has_dt = float(str(row.get('has_dead_time', 'False')).lower() == 'true')
-                dt_val = float(row.get('dead_time_value', 0.0)) / DT_VALUE_SCALE
+            with Image.open(img_path) as im:
+                images.append(self.transform(im))
+            signals.append(torch.from_numpy(np.load(sig_path)).float())
+            labels.append(self.class_to_idx[cls])
 
-                st  = float(row.get('settling_time',     0.0)) / REG_SCALES['settling_time']
-                rt  = float(row.get('rise_time',         0.0)) / REG_SCALES['rise_time']
-                ov  = float(row.get('overshoot_pct',     0.0)) / REG_SCALES['overshoot_pct']
-                ssg = float(row.get('steady_state_gain', 0.0)) / REG_SCALES['steady_state_gain']
+            row    = metadata.get((cls, fname), {})
+            has_dt = float(str(row.get('has_dead_time', 'False')).lower() == 'true')
+            dt_val = float(row.get('dead_time_value', 0.0)) / DT_VALUE_SCALE
 
-                has_dt_list.append(has_dt)
-                dt_val_list.append(dt_val)
-                reg_list.append([st, rt, ov, ssg])
+            st  = float(row.get('settling_time',     0.0)) / REG_SCALES['settling_time']
+            rt  = float(row.get('rise_time',         0.0)) / REG_SCALES['rise_time']
+            ov  = float(row.get('overshoot_pct',     0.0)) / REG_SCALES['overshoot_pct']
+            ssg = float(row.get('steady_state_gain', 0.0)) / REG_SCALES['steady_state_gain']
+
+            has_dt_list.append(has_dt)
+            dt_val_list.append(dt_val)
+            reg_list.append([st, rt, ov, ssg])
 
         self.images      = torch.stack(images)
         self.signals     = torch.stack(signals)

@@ -38,6 +38,41 @@ def compute_loss(out, lbl, has_dt, dt_val, reg):
           + W_REG    * loss_reg)
 
 
+CHECKPOINT_PATH = os.path.join(
+    os.path.dirname(__file__), '..', '..', 'results', 'trained_nets', 'checkpoint.pth'
+)
+
+
+def save_checkpoint(epoch, model, optimizer, scheduler, best_val_loss, epochs_no_improve, best_weights):
+    os.makedirs(os.path.dirname(os.path.abspath(CHECKPOINT_PATH)), exist_ok=True)
+    torch.save({
+        'epoch':             epoch,
+        'model_state':       model.state_dict(),
+        'optimizer_state':   optimizer.state_dict(),
+        'scheduler_state':   scheduler.state_dict(),
+        'best_val_loss':     best_val_loss,
+        'epochs_no_improve': epochs_no_improve,
+        'best_weights':      best_weights,
+    }, CHECKPOINT_PATH)
+
+
+def load_checkpoint(model, optimizer, scheduler):
+    path = os.path.abspath(CHECKPOINT_PATH)
+    if not os.path.exists(path):
+        return 0, float('inf'), 0, None
+    print(f'Resuming from checkpoint: {path}')
+    ckpt = torch.load(path, map_location='cpu')
+    model.load_state_dict(ckpt['model_state'])
+    optimizer.load_state_dict(ckpt['optimizer_state'])
+    scheduler.load_state_dict(ckpt['scheduler_state'])
+    return (
+        ckpt['epoch'] + 1,
+        ckpt['best_val_loss'],
+        ckpt['epochs_no_improve'],
+        ckpt['best_weights'],
+    )
+
+
 def train_fusion_model():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'Device: {device}')
@@ -56,13 +91,14 @@ def train_fusion_model():
     optimizer = optim.AdamW(model.parameters(), lr=3e-4, weight_decay=1e-4)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=3, factor=0.5)
 
-    epochs            = 100
-    patience          = 8
-    best_val_loss     = float('inf')
-    epochs_no_improve = 0
-    best_weights      = None
+    epochs = 100
+    patience = 8
 
-    for epoch in range(epochs):
+    start_epoch, best_val_loss, epochs_no_improve, best_weights = load_checkpoint(
+        model, optimizer, scheduler
+    )
+
+    for epoch in range(start_epoch, epochs):
         t0 = time.time()
 
         # ── Train ──────────────────────────────────────────────
@@ -130,7 +166,12 @@ def train_fusion_model():
             epochs_no_improve += 1
             if epochs_no_improve >= patience:
                 print(f'\n[!] Early stopping. Best val loss: {best_val_loss:.4f}')
+                save_checkpoint(epoch, model, optimizer, scheduler,
+                                best_val_loss, epochs_no_improve, best_weights)
                 break
+
+        save_checkpoint(epoch, model, optimizer, scheduler,
+                        best_val_loss, epochs_no_improve, best_weights)
 
     if best_weights:
         save_path = os.path.join(root_dir, '..', 'results', 'trained_nets', 'multitask_fusion_best.pth')

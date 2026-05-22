@@ -57,11 +57,21 @@ class MultimodalFusionNet(nn.Module):
         )
 
         # ── Output heads ────────────────────────────────────────
-        self.head_class  = nn.Linear(128, num_classes)  # 6-way classification
-        self.head_dt_cls = nn.Linear(128, 1)            # has dead time (binary)
-        self.head_dt_val = nn.Linear(128, 1)            # dead time value
-        self.head_reg    = nn.Sequential(               # settling, rise, overshoot, gain
+        self.head_class  = nn.Sequential(               # 6-way classification
             nn.Linear(128, 64), nn.ReLU(),
+            nn.Linear(64, num_classes),
+        )
+        self.head_dt_cls = nn.Sequential(               # has dead time (binary)
+            nn.Linear(128, 32), nn.ReLU(),
+            nn.Linear(32, 1),
+        )
+        self.head_dt_val = nn.Sequential(               # dead time value (regression)
+            nn.Linear(128, 64), nn.ReLU(),
+            nn.Linear(64, 1),
+        )
+        self.head_reg    = nn.Sequential(               # settling, rise, overshoot, gain
+            nn.Linear(128, 128), nn.ReLU(),
+            nn.Linear(128, 64),  nn.ReLU(),
             nn.Linear(64, num_reg_targets),
         )
 

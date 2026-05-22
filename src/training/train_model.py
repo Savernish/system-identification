@@ -11,8 +11,8 @@ from src.models.build_fusion_net import MultimodalFusionNet
 # ── Loss weights ────────────────────────────────────────────────
 W_CLASS  = 1.0   # transfer function class (main task)
 W_DT_CLS = 0.5   # has dead time  (binary)
-W_DT_VAL = 0.5   # dead time value (regression, masked to DT samples only)
-W_REG    = 0.5   # settling time, rise time, overshoot, gain
+W_DT_VAL = 1.0   # dead time value (regression, masked to DT samples only)
+W_REG    = 1.0   # settling time, rise time, overshoot, gain
 
 
 def compute_loss(out, lbl, has_dt, dt_val, reg):
@@ -92,7 +92,7 @@ def train_fusion_model():
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=3, factor=0.5)
 
     epochs = 100
-    patience = 8
+    patience = 15
 
     start_epoch, best_val_loss, epochs_no_improve, best_weights = load_checkpoint(
         model, optimizer, scheduler

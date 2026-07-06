@@ -3,35 +3,35 @@ MULTI-TASK FUSION MODEL — EVALUATION REPORT
 Test samples : 1800
 Classes      : ['Class1_FOPTD', 'Class2_SOPTD', 'Class3_NMP', 'Class4_Underdamped', 'Class5_HighOrder', 'Class6_Integrator']
 
-Classification accuracy : 81.22%
-Dead time detection acc : 90.22%
+Classification accuracy : 81.78%
+Dead time detection acc : 94.50%
 
 CLASSIFICATION
                     precision    recall  f1-score   support
 
-      Class1_FOPTD     0.8081    0.7300    0.7671       300
-      Class2_SOPTD     0.7729    0.6467    0.7042       300
-        Class3_NMP     0.7211    0.8533    0.7817       300
-Class4_Underdamped     0.9714    0.9067    0.9379       300
-  Class5_HighOrder     0.9421    0.9767    0.9591       300
- Class6_Integrator     0.6867    0.7600    0.7215       300
+      Class1_FOPTD     0.7952    0.7767    0.7858       300
+      Class2_SOPTD     0.7791    0.6467    0.7067       300
+        Class3_NMP     0.7829    0.8533    0.8166       300
+Class4_Underdamped     0.9600    0.8800    0.9183       300
+  Class5_HighOrder     0.9399    0.9900    0.9643       300
+ Class6_Integrator     0.6706    0.7600    0.7125       300
 
-          accuracy                         0.8122      1800
-         macro avg     0.8171    0.8122    0.8119      1800
-      weighted avg     0.8171    0.8122    0.8119      1800
+          accuracy                         0.8178      1800
+         macro avg     0.8213    0.8178    0.8174      1800
+      weighted avg     0.8213    0.8178    0.8174      1800
 
 
 REGRESSION
 ╒═════════════════════╤═════════╤═════════╕
 │       Target        │     MAE │    RMSE │
 ╞═════════════════════╪═════════╪═════════╡
-│ Dead Time Value (s) │  2.2525 │  2.9609 │
+│ Dead Time Value (s) │  1.5702 │  2.2156 │
 ├─────────────────────┼─────────┼─────────┤
-│  Settling Time (s)  │ 21.7404 │ 25.6813 │
+│  Settling Time (s)  │ 13.8702 │ 19.3536 │
 ├─────────────────────┼─────────┼─────────┤
-│    Rise Time (s)    │  4.4189 │  5.7535 │
+│    Rise Time (s)    │  3.0692 │  4.193  │
 ├─────────────────────┼─────────┼─────────┤
-│   Overshoot % (%)   │  6.7057 │ 12.901  │
+│   Overshoot % (%)   │  5.2599 │ 10.6411 │
 ├─────────────────────┼─────────┼─────────┤
-│  Steady-State Gain  │  0.5977 │  0.7323 │
+│  Steady-State Gain  │  0.4299 │  0.5617 │
 ╘═════════════════════╧═════════╧═════════╛

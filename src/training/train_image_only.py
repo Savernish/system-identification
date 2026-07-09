@@ -1,10 +1,16 @@
 import os
+import sys
 import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from src.training.dataset import SystemIDDataset
 from src.models.build_image_only_net import ImageOnlyNet
 
@@ -44,7 +50,7 @@ def train_image_only_model():
         # --- TRAIN ---
         model.train()
         train_loss, train_correct, train_total = 0.0, 0, 0
-        for img, sig, label in tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]", leave=False):
+        for img, sig, label, *_ in tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]", leave=False):
             img, label = img.to(device), label.to(device)
 
             optimizer.zero_grad()
@@ -65,7 +71,7 @@ def train_image_only_model():
         model.eval()
         val_loss, val_correct, val_total = 0.0, 0, 0
         with torch.no_grad():
-            for img, sig, label in val_loader:
+            for img, sig, label, *_ in val_loader:
                 img, label = img.to(device), label.to(device)
                 out = model(img)
                 loss = criterion(out, label)

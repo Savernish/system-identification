@@ -5,7 +5,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from tqdm import tqdm
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
@@ -80,7 +79,7 @@ def train_fusion_model():
 
         model.train()
         t_loss = t_correct = t_total = 0
-        for img, sig, lbl, *_ in tqdm(train_loader, desc=f'Epoch {epoch+1} [Train]', leave=False):
+        for img, sig, lbl, *_ in train_loader:
             img, sig, lbl = img.to(device), sig.to(device), lbl.to(device)
 
             optimizer.zero_grad()

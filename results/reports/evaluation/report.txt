@@ -1,37 +1,19 @@
-MULTI-TASK FUSION MODEL — EVALUATION REPORT
+FUSION MODEL — EVALUATION REPORT
 
 Test samples : 1800
 Classes      : ['Class1_FOPTD', 'Class2_SOPTD', 'Class3_NMP', 'Class4_Underdamped', 'Class5_HighOrder', 'Class6_Integrator']
 
-Classification accuracy : 81.78%
-Dead time detection acc : 94.50%
+Accuracy     : 83.17%
 
-CLASSIFICATION
                     precision    recall  f1-score   support
 
-      Class1_FOPTD     0.7952    0.7767    0.7858       300
-      Class2_SOPTD     0.7791    0.6467    0.7067       300
-        Class3_NMP     0.7829    0.8533    0.8166       300
-Class4_Underdamped     0.9600    0.8800    0.9183       300
-  Class5_HighOrder     0.9399    0.9900    0.9643       300
- Class6_Integrator     0.6706    0.7600    0.7125       300
+      Class1_FOPTD     0.7838    0.7733    0.7785       300
+      Class2_SOPTD     0.8083    0.7167    0.7597       300
+        Class3_NMP     0.8387    0.8667    0.8525       300
+Class4_Underdamped     0.9537    0.8933    0.9225       300
+  Class5_HighOrder     0.9216    0.9800    0.9499       300
+ Class6_Integrator     0.6951    0.7600    0.7261       300
 
-          accuracy                         0.8178      1800
-         macro avg     0.8213    0.8178    0.8174      1800
-      weighted avg     0.8213    0.8178    0.8174      1800
-
-
-REGRESSION
-╒═════════════════════╤══════════╤═════════╤════════╕
-│                     │   Target │     MAE │  RMSE  │
-╞═════════════════════╪══════════╪═════════╪════════╡
-│ Dead Time Value (s) │   1.5702 │  2.2156 │ 19.86% │
-├─────────────────────┼──────────┼─────────┼────────┤
-│  Settling Time (s)  │  13.8702 │ 19.3536 │ 22.77% │
-├─────────────────────┼──────────┼─────────┼────────┤
-│    Rise Time (s)    │   3.0692 │  4.193  │ 18.62% │
-├─────────────────────┼──────────┼─────────┼────────┤
-│   Overshoot % (%)   │   5.2599 │ 10.6411 │ 46.35% │
-├─────────────────────┼──────────┼─────────┼────────┤
-│  Steady-State Gain  │   0.4299 │  0.5617 │ 15.40% │
-╘═════════════════════╧══════════╧═════════╧════════╛
+          accuracy                         0.8317      1800
+         macro avg     0.8335    0.8317    0.8315      1800
+      weighted avg     0.8335    0.8317    0.8315      1800

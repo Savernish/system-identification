@@ -2,12 +2,12 @@
 """
 Dataset generator for System Identification (Piroddi & Leva, 2007).
 Generates step response data for 6 transfer function classes:
-  Class1_FOPTD       : mu / (1 + sT)
-  Class2_SOPTD       : mu / ((1+sT1)(1+sT2))
+  Class1_FirstOrder  : mu / (1 + sT)
+  Class2_Overdamped  : mu / ((1+sT1)(1+sT2))
   Class3_NMP         : mu(1-sT_z) / ((1+sT1)(1+sT2))
-  Class4_Underdamped : mu(1+sT_z) / ((1+sT1)(1+sT2)),  T_z > T1, T2
-  Class5_HighOrder   : mu*wn^2 / (s^2 + 2*zeta*wn*s + wn^2)
-  Class6_Integrator  : mu*wn^2 / ((sT+1)(s^2 + 2*zeta*wn*s + wn^2))
+  Class4_Underdamped : mu*wn^2 / (s^2 + 2*zeta*wn*s + wn^2),  zeta < 1
+  Class5_HighOrder   : mu / ((1+sT1)(1+sT2)(1+sT3)(1+sT4))  — 4th order
+  Class6_Integrator  : mu / (s*(1+sT))  — true integrator, ramp response
 
 Variant system
 --------------
@@ -72,13 +72,13 @@ VARIANT_CONFIG = {
 # Transfer function generators
 # ──────────────────────────────────────────────────────────────
 
-def class1_foptd(rng):
+def class1_first_order(rng):
     """G(s) = mu / (1 + sT)"""
     mu = rng.uniform(0.5, 5.0)
     T  = rng.uniform(1.0, 20.0)
     return sp_signal.TransferFunction([mu], [T, 1.0])
 
-def class2_soptd(rng):
+def class2_overdamped(rng):
     """G(s) = mu / ((1+sT1)(1+sT2))"""
     mu = rng.uniform(0.5, 5.0)
     T1 = rng.uniform(1.0, 15.0)
@@ -95,35 +95,32 @@ def class3_nmp(rng):
     return sp_signal.TransferFunction(num, np.polymul([T1, 1.0], [T2, 1.0]))
 
 def class4_underdamped(rng):
-    """G(s) = mu(1 + sT_z) / ((1+sT1)(1+sT2)),  T_z > T1, T2"""
-    mu = rng.uniform(0.5, 5.0)
-    T1 = rng.uniform(1.0, 10.0)
-    T2 = rng.uniform(1.0, 10.0)
-    Tz = max(T1, T2) + rng.uniform(1.0, 10.0)
-    num = np.array([Tz, 1.0]) * mu
-    return sp_signal.TransferFunction(num, np.polymul([T1, 1.0], [T2, 1.0]))
-
-def class5_high_order(rng):
-    """G(s) = mu*wn^2 / (s^2 + 2*zeta*wn*s + wn^2)"""
+    """G(s) = mu*wn^2 / (s^2 + 2*zeta*wn*s + wn^2),  zeta < 1"""
     mu   = rng.uniform(0.5, 5.0)
     wn   = rng.uniform(0.3, 3.0)
     zeta = rng.uniform(0.05, 0.7)
     return sp_signal.TransferFunction([mu * wn**2], [1.0, 2*zeta*wn, wn**2])
 
+def class5_high_order(rng):
+    """G(s) = mu / ((1+sT1)(1+sT2)(1+sT3)(1+sT4))  — 4th order"""
+    mu = rng.uniform(0.5, 5.0)
+    T1 = rng.uniform(1.0, 10.0)
+    T2 = rng.uniform(1.0, 10.0)
+    T3 = rng.uniform(1.0, 10.0)
+    T4 = rng.uniform(1.0, 10.0)
+    den = np.polymul(np.polymul([T1, 1.0], [T2, 1.0]), np.polymul([T3, 1.0], [T4, 1.0]))
+    return sp_signal.TransferFunction([mu], den)
+
 def class6_integrator(rng):
-    """G(s) = mu*wn^2 / ((sT+1)(s^2 + 2*zeta*wn*s + wn^2))"""
-    mu   = rng.uniform(0.5, 5.0)
-    T    = rng.uniform(1.0, 15.0)
-    wn   = rng.uniform(0.3, 3.0)
-    zeta = rng.uniform(0.05, 0.7)
-    return sp_signal.TransferFunction(
-        [mu * wn**2],
-        np.polymul([T, 1.0], [1.0, 2*zeta*wn, wn**2])
-    )
+    """G(s) = mu / (s*(1+sT))  — true integrator, ramp step response"""
+    mu = rng.uniform(0.02, 0.15)   # small to keep output bounded in T_FINAL=100s
+    T  = rng.uniform(1.0, 15.0)
+    # s*(1+sT) = T*s^2 + s + 0
+    return sp_signal.TransferFunction([mu], [T, 1.0, 0.0])
 
 CLASS_GENERATORS = {
-    'Class1_FOPTD':       class1_foptd,
-    'Class2_SOPTD':       class2_soptd,
+    'Class1_FirstOrder':  class1_first_order,
+    'Class2_Overdamped':  class2_overdamped,
     'Class3_NMP':         class3_nmp,
     'Class4_Underdamped': class4_underdamped,
     'Class5_HighOrder':   class5_high_order,

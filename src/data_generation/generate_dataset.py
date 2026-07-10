@@ -81,8 +81,8 @@ def class1_first_order(rng):
 def class2_overdamped(rng):
     """G(s) = mu / ((1+sT1)(1+sT2))"""
     mu = rng.uniform(0.5, 5.0)
-    T1 = rng.uniform(1.0, 15.0)
-    T2 = rng.uniform(1.0, 15.0)
+    T1 = rng.uniform(3.0, 15.0)
+    T2 = rng.uniform(3.0, 15.0)
     return sp_signal.TransferFunction([mu], np.polymul([T1, 1.0], [T2, 1.0]))
 
 def class3_nmp(rng):
@@ -98,16 +98,16 @@ def class4_underdamped(rng):
     """G(s) = mu*wn^2 / (s^2 + 2*zeta*wn*s + wn^2),  zeta < 1"""
     mu   = rng.uniform(0.5, 5.0)
     wn   = rng.uniform(0.3, 3.0)
-    zeta = rng.uniform(0.05, 0.7)
+    zeta = rng.uniform(0.05, 0.5)
     return sp_signal.TransferFunction([mu * wn**2], [1.0, 2*zeta*wn, wn**2])
 
 def class5_high_order(rng):
     """G(s) = mu / ((1+sT1)(1+sT2)(1+sT3)(1+sT4))  — 4th order"""
     mu = rng.uniform(0.5, 5.0)
-    T1 = rng.uniform(1.0, 10.0)
-    T2 = rng.uniform(1.0, 10.0)
-    T3 = rng.uniform(1.0, 10.0)
-    T4 = rng.uniform(1.0, 10.0)
+    T1 = rng.uniform(3.0, 10.0)
+    T2 = rng.uniform(3.0, 10.0)
+    T3 = rng.uniform(3.0, 10.0)
+    T4 = rng.uniform(3.0, 10.0)
     den = np.polymul(np.polymul([T1, 1.0], [T2, 1.0]), np.polymul([T3, 1.0], [T4, 1.0]))
     return sp_signal.TransferFunction([mu], den)
 
